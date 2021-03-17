@@ -678,7 +678,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.type = REMOTEUI_PARAM_FLOAT;
 							p.floatVal = s.getFloatValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_FLOAT){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_FLOAT){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							float val;
 							if(loadFromXmlClampsToValidRange){
 								val = ofClamp(s.getFloatValue(), p.minFloat, p.maxFloat);
@@ -695,7 +695,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.type = REMOTEUI_PARAM_INT;
 							p.intVal = s.getIntValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_INT){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_INT){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							int val;
 							if(loadFromXmlClampsToValidRange){
 								val = ofClamp(s.getIntValue(), p.minInt, p.maxInt);
@@ -712,7 +712,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.type = REMOTEUI_PARAM_STRING;
 							p.stringVal = s.getValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_STRING){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_STRING){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							string val = s.getValue();
 							p.stringVal = *p.stringValAddr = val;
 							if(verbose_) RLOG_NOTICE << "loading a STRING '" << paramName <<"' (" << (string) *p.stringValAddr << ") from XML" ;
@@ -724,7 +724,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.type = REMOTEUI_PARAM_ENUM;
 							p.intVal = s.getIntValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_ENUM){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_ENUM){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							int val = ofClamp(s.getIntValue(), p.minInt, p.maxInt);
 							p.intVal = *p.intValAddr = val;
 							if(verbose_) RLOG_NOTICE << "loading an ENUM '" << paramName <<"' (" << (int) *p.intValAddr << ") from XML" ;
@@ -736,7 +736,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.type = REMOTEUI_PARAM_BOOL;
 							p.boolVal = s.getIntValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_BOOL){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_BOOL){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							bool val = s.getIntValue();
 							p.boolVal = *p.boolValAddr = val;
 							if(verbose_) RLOG_NOTICE << "loading a BOOL '" << paramName <<"' (" << (bool) *p.boolValAddr << ") from XML" ;
@@ -761,7 +761,7 @@ vector<string> ofxRemoteUIServer::loadFromXMLv2(string fileName){
 							p.blueVal = s.getAttribute("c2.blue").getIntValue();
 							p.alphaVal = s.getAttribute("c3.alpha").getIntValue();
 						}else{
-							if(p.type != REMOTEUI_PARAM_COLOR){ RLOG_ERROR << "type missmatch parsing '" << paramName << "'. Ignoring it!"; break;}
+							if(p.type != REMOTEUI_PARAM_COLOR){ RLOG_ERROR << "type mismatch parsing '" << paramName << "'. Ignoring it!"; break;}
 							unsigned char r = s.getAttribute("c0.red").getIntValue();
 							unsigned char g = s.getAttribute("c1.green").getIntValue();
 							unsigned char b = s.getAttribute("c2.blue").getIntValue();
@@ -936,7 +936,7 @@ void ofxRemoteUIServer::saveSettingsBackup(){
 			og.open(originalPath);
 			if ( og.exists() ){
 				try{
-					ofFile::moveFromTo(originalPath, destPath, true, true); //TODO complains on windows!
+					ofFile::moveFromTo(originalPath, destPath, true, true); //FIXME: complains on windows!
 				}catch(...){}
 			}
 			og.close();
@@ -954,6 +954,13 @@ void ofxRemoteUIServer::saveSettingsBackup(){
 	#endif
 }
 
+void ofxRemoteUIServer::setShouldBroadcastServerAddress(bool shouldBroadcast){
+	userBroadcastPreference = shouldBroadcast;
+}
+
+bool ofxRemoteUIServer::getShouldBroadcastServerAddress(){
+	return userBroadcastPreference;
+}
 
 
 void ofxRemoteUIServer::setup(int port_, float updateInterval_){
@@ -1561,6 +1568,11 @@ void ofxRemoteUIServer::drawString(const string & text, const float & x, const f
 	}
 }
 
+void ofxRemoteUIServer::setCustomDrawPos(int x, int y){
+	customPos.x = x;
+	customPos.y = y;
+}
+
 //x and y of where the notifications will get draw
 void ofxRemoteUIServer::draw(int x, int y){
 
@@ -1570,11 +1582,13 @@ void ofxRemoteUIServer::draw(int x, int y){
 	int screenH, screenW;
 
 	if(needsToDrawNotification | showUI){
-		ofSetupScreen(); //mmm this is a bit scary //TODO!
+		ofSetupScreen(); //FIXME: mmm this is a bit scary
 
 		ofPushStyle();
 		ofPushMatrix();
+		ofTranslate(customPos.x, customPos.y);
 		ofScale(uiScale,uiScale);
+
 		ofSetDrawBitmapMode(OF_BITMAPMODE_SIMPLE);
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		ofSetRectMode(OF_RECTMODE_CORNER);
@@ -1908,7 +1922,7 @@ void ofxRemoteUIServer::setCustomScreenWidth(int w){
 #endif
 
 void ofxRemoteUIServer::handleBroadcast(){
-	if(doBroadcast){
+	if(doBroadcast && userBroadcastPreference){
 		if(broadcastTime > OFXREMOTEUI_BORADCAST_INTERVAL){
 			broadcastTime = 0.0f;
 
@@ -1925,7 +1939,6 @@ void ofxRemoteUIServer::handleBroadcast(){
 }
 
 void ofxRemoteUIServer::updateServer(float dt){
-
 
 	#ifdef OF_AVAILABLE
 	onScreenNotifications.update(dt);
@@ -2219,7 +2232,7 @@ void ofxRemoteUIServer::deletePreset(string name, string group){
 		string path = getFinalPath(OFXREMOTEUI_PRESET_DIR) + "/" + group + "/" + name + "." + OFXREMOTEUI_PRESET_FILE_EXTENSION;
 		ofFile::removeFile(path);
 	}
-	#else //TODO this wont work, relative path
+	#else //FIXME: this wont work, relative path
 	string file = getFinalPath(OFXREMOTEUI_PRESET_DIR) + "/" + name + "." + OFXREMOTEUI_PRESET_FILE_EXTENSION;
 	if (group != "") file = getFinalPath(OFXREMOTEUI_PRESET_DIR) + "/" + group + "/" + name + "." + OFXREMOTEUI_PRESET_FILE_EXTENSION;
 	remove( file.c_str() );
@@ -3046,34 +3059,34 @@ string ofxRemoteUIServer::oscToJson(ofxOscMessage m) {
     
 }
 
-ofxOscMessage ofxRemoteUIServer::jsonToOsc(Json::Value json){
+ofxOscMessage ofxRemoteUIServer::jsonToOsc(ofJson json){
     ofxOscMessage m;
-    m.setAddress(json.get("addr", "NONE").asString());
+    m.setAddress(json.count("addr") > 0 ? json["addr"].get<std::string>() : "NONE");
     
-    Json::Value argv = json.get("args", Json::nullValue);
+    ofJson argv = json["args"];
     int argc = argv.size();
     
     for (int i = 0; i < argc; i++) {
         
-        Json::Value arg = argv.get(i, Json::nullValue);
+        ofJson arg = argv[i];
         
         switch (arg.type()) {
                 
-            case Json::intValue:
-            case Json::uintValue:
-                m.addIntArg(arg.asInt());
+            case ofJson::value_t::number_integer:
+            case ofJson::value_t::number_unsigned:
+                m.addIntArg(arg);
                 break;
                 
-            case Json::realValue:
-                m.addFloatArg(arg.asFloat());
+            case ofJson::value_t::number_float:
+                m.addFloatArg(arg);
                 break;
                 
-            case Json::stringValue:
-                m.addStringArg(arg.asString());
+            case ofJson::value_t::string:
+                m.addStringArg(arg.get<std::string>());
                 break;
                 
-            case Json::booleanValue:
-                m.addBoolArg(arg.asBool());
+            case ofJson::value_t::boolean:
+                m.addBoolArg(arg.get<bool>());
                 break;
                 
             default:

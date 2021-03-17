@@ -175,6 +175,9 @@ public:
 	void setAutoDraw(bool d){autoDraw = d;};
 	bool getAutoDraw(){return autoDraw;}
 
+	void setShouldBroadcastServerAddress(bool shouldBroadcast);
+	bool getShouldBroadcastServerAddress();
+
 	void setLoadFromXmlClampsToValidRange(bool clamp){ loadFromXmlClampsToValidRange = clamp;}
 
 	// Font render configs ///////
@@ -207,6 +210,7 @@ public:
 	void setBuiltInUiScale(float s);
 	void setCustomScreenHeight(int h);
 	void setCustomScreenWidth(int w);
+	void setCustomDrawPos(int x, int y);
 
 	void setNotificationScreenTime(float t){onScreenNotifications.setNotificationScreenTime(t);}
 	void setLogNotificationScreenTime(float t){onScreenNotifications.setLogNotificationScreenTime(t);}
@@ -314,7 +318,8 @@ protected:
 
 	string				lastAddedParam;
 
-	bool			doBroadcast; //controls if the server advertises itself
+	bool			doBroadcast; //controls if the server advertises itself - controled by internal logic
+	bool			userBroadcastPreference = true; //does the user want broadcast ON? - control by user API
 	bool			drawNotifications;
 
 	bool			loadedFromXML; //we start with loadedFromXML=false; once loadXML is called, this becomes true
@@ -358,6 +363,7 @@ protected:
 	float													xOffsetTarget; //smooth transitions scrolling
 	int														customScreenHeight;
 	int														customScreenWidth;
+	ofVec2f													customPos;
 	int														selectedColorComp; //[0..4]
 
 	enum FontRenderer{
@@ -412,7 +418,7 @@ protected:
     void    listenWebSocket(int port);
     int     wsPort;
     class mutex    wsDequeMut;
-    ofxOscMessage  jsonToOsc(Json::Value json);
+    ofxOscMessage  jsonToOsc(ofJson json);
     std::string         oscToJson(ofxOscMessage m);
     ofxLibwebsockets::Server wsServer;
 #endif
