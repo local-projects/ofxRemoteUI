@@ -549,7 +549,13 @@ void ofxRemoteUIServer::saveToXMLv2(string fileName, string groupName){
 	s.print(writer);
 
 	ofstream myfile;
-	string fullPath = dataPath + "/" + fileName;
+    string   fullPath; 
+    if( !savingGroupOnly ) {
+        fullPath = fileName;
+    } else {
+         fullPath = dataPath + fileName;
+	}
+
 	myfile.open(fullPath.c_str());
 	myfile << writer.result;
 	myfile.close();
